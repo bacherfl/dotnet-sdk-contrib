@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -12,28 +12,26 @@ using ProtoValue = Google.Protobuf.WellKnownTypes.Value;
 namespace OpenFeature.Contrib.Providers.Flagd
 {
     /// <summary>
-    /// A stub class.
+    ///     FlagdProvider is the OpenFeature provider for flagD.
     /// </summary>
     public sealed class FlagdProvider : FeatureProvider
     {
         private readonly Service.ServiceClient _client;
         private readonly Metadata _providerMetadata = new Metadata("flagD Provider");
 
+        /// <summary>
+        ///     Constructor of the provider.
+        ///     <param name="url">The URL of the flagD server</param>
+        ///     <exception cref="ArgumentNullException">if no url is provided.</exception>
+        /// </summary>
         public FlagdProvider(Uri url)
         {
             if (url == null)
             {
                 throw new ArgumentNullException(nameof(url));
             }
-            
-#if NETSTANDARD2_0
+
             _client = new Service.ServiceClient(GrpcChannel.ForAddress(url));
-#else
-            _client = new Service.ServiceClient(GrpcChannel.ForAddress(url, new GrpcChannelOptions
-            {
-                HttpHandler = new WinHttpHandler()
-            }));
-#endif
         }
         
         /// <summary>
@@ -44,8 +42,18 @@ namespace OpenFeature.Contrib.Providers.Flagd
             return Api.Instance.GetProviderMetadata().Name;
         }
         
+        /// <summary>
+        ///     Return the metadata associated to this provider.
+        /// </summary>
         public override Metadata GetMetadata() => _providerMetadata;
 
+        /// <summary>
+        ///     ResolveBooleanValue resolve the value for a Boolean Flag.
+        /// </summary>
+        /// <param name="flagKey">Name of the flag</param>
+        /// <param name="defaultValue">Default value used in case of error.</param>
+        /// <param name="context">Context about the user</param>
+        /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<bool>> ResolveBooleanValue(string flagKey, bool defaultValue, EvaluationContext context = null)
         {
             var resolveBooleanResponse = await _client.ResolveBooleanAsync(new ResolveBooleanRequest
@@ -62,6 +70,13 @@ namespace OpenFeature.Contrib.Providers.Flagd
             );
         }
 
+        /// <summary>
+        ///     ResolveStringValue resolve the value for a string Flag.
+        /// </summary>
+        /// <param name="flagKey">Name of the flag</param>
+        /// <param name="defaultValue">Default value used in case of error.</param>
+        /// <param name="context">Context about the user</param>
+        /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<string>> ResolveStringValue(string flagKey, string defaultValue, EvaluationContext context = null)
         {
             var resolveBooleanResponse = await _client.ResolveStringAsync(new ResolveStringRequest
@@ -78,6 +93,13 @@ namespace OpenFeature.Contrib.Providers.Flagd
             );
         }
 
+        /// <summary>
+        ///     ResolveIntegerValue resolve the value for an int Flag.
+        /// </summary>
+        /// <param name="flagKey">Name of the flag</param>
+        /// <param name="defaultValue">Default value used in case of error.</param>
+        /// <param name="context">Context about the user</param>
+        /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<int>> ResolveIntegerValue(string flagKey, int defaultValue, EvaluationContext context = null)
         {
             var resolveIntResponse = await _client.ResolveIntAsync(new ResolveIntRequest
@@ -94,6 +116,13 @@ namespace OpenFeature.Contrib.Providers.Flagd
             );
         }
 
+        /// <summary>
+        ///     ResolveDoubleValue resolve the value for a double Flag.
+        /// </summary>
+        /// <param name="flagKey">Name of the flag</param>
+        /// <param name="defaultValue">Default value used in case of error.</param>
+        /// <param name="context">Context about the user</param>
+        /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<double>> ResolveDoubleValue(string flagKey, double defaultValue, EvaluationContext context = null)
         {
             var resolveDoubleResponse = await _client.ResolveFloatAsync(new ResolveFloatRequest
@@ -110,6 +139,13 @@ namespace OpenFeature.Contrib.Providers.Flagd
             );
         }
 
+        /// <summary>
+        ///     ResolveStructureValue resolve the value for a Boolean Flag.
+        /// </summary>
+        /// <param name="flagKey">Name of the flag</param>
+        /// <param name="defaultValue">Default value used in case of error.</param>
+        /// <param name="context">Context about the user</param>
+        /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<Value>> ResolveStructureValue(string flagKey, Value defaultValue, EvaluationContext context = null)
         {
             var resolveObjectResponse = await _client.ResolveObjectAsync(new ResolveObjectRequest
@@ -221,5 +257,4 @@ namespace OpenFeature.Contrib.Providers.Flagd
         }
     }
 }
-
 
