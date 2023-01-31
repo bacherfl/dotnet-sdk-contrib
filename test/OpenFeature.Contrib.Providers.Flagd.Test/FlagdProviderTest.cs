@@ -247,7 +247,7 @@ namespace OpenFeature.Contrib.Providers.Flagd.Test
         [Fact]
         public void TestResolveUnknownError()
         {
-            var exc = new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.Internal, "unknwon error"));
+            var exc = new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.Internal, "unknown error"));
             
             var grpcResp = new AsyncUnaryCall<ResolveBooleanResponse>(
                 System.Threading.Tasks.Task.FromException<ResolveBooleanResponse>(exc),

@@ -31,7 +31,15 @@ namespace OpenFeature.Contrib.Providers.Flagd
                 throw new ArgumentNullException(nameof(url));
             }
 
+            //_client = new Service.ServiceClient(GrpcChannel.ForAddress(url));
+            #if NETSTANDARD2_0
             _client = new Service.ServiceClient(GrpcChannel.ForAddress(url));
+#else
+            _client = new Service.ServiceClient(GrpcChannel.ForAddress(url, new GrpcChannelOptions
+            {
+                HttpHandler = new WinHttpHandler()
+            }));
+#endif
         }
 
         /// <summary>
