@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using OpenFeature.Model;
-using Schema.V1;
+using OpenFeature.Error;
+
+using OpenFeature.Flagd.Grpc;
 using Value = OpenFeature.Model.Value;
 using ProtoValue = Google.Protobuf.WellKnownTypes.Value;
 
@@ -33,6 +35,16 @@ namespace OpenFeature.Contrib.Providers.Flagd
 
             _client = new Service.ServiceClient(GrpcChannel.ForAddress(url));
         }
+
+        /// <summary>
+        ///     Constructor of the provider.
+        ///     <param name="client">The Grpc client used to communicate with the server</param>
+        ///     <exception cref="ArgumentNullException">if no url is provided.</exception>
+        /// </summary>
+        public FlagdProvider(Service.ServiceClient client)
+        {
+            _client = client;
+        }
         
         /// <summary>
         /// Get the provider name.
@@ -56,18 +68,25 @@ namespace OpenFeature.Contrib.Providers.Flagd
         /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<bool>> ResolveBooleanValue(string flagKey, bool defaultValue, EvaluationContext context = null)
         {
-            var resolveBooleanResponse = await _client.ResolveBooleanAsync(new ResolveBooleanRequest
+            try
             {
-                Context = ConvertToContext(context),
-                FlagKey = flagKey
-            });
+                var resolveBooleanResponse = await _client.ResolveBooleanAsync(new ResolveBooleanRequest
+                {
+                    Context = ConvertToContext(context),
+                    FlagKey = flagKey
+                });
 
-            return new ResolutionDetails<bool>(
-                flagKey: flagKey, 
-                value: resolveBooleanResponse.Value,
-                reason: resolveBooleanResponse.Reason, 
-                variant: resolveBooleanResponse.Variant
-            );
+                return new ResolutionDetails<bool>(
+                    flagKey: flagKey, 
+                    value: resolveBooleanResponse.Value,
+                    reason: resolveBooleanResponse.Reason, 
+                    variant: resolveBooleanResponse.Variant
+                );
+            }
+            catch (Grpc.Core.RpcException e)
+            {
+                return GetDefaultWithException<bool>(e, flagKey, defaultValue);
+            }
         }
 
         /// <summary>
@@ -79,18 +98,26 @@ namespace OpenFeature.Contrib.Providers.Flagd
         /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<string>> ResolveStringValue(string flagKey, string defaultValue, EvaluationContext context = null)
         {
-            var resolveBooleanResponse = await _client.ResolveStringAsync(new ResolveStringRequest
+            try 
             {
-                Context = ConvertToContext(context),
-                FlagKey = flagKey
-            });
+                var resolveBooleanResponse = await _client.ResolveStringAsync(new ResolveStringRequest
+                {
+                    Context = ConvertToContext(context),
+                    FlagKey = flagKey
+                });
 
-            return new ResolutionDetails<string>(
-                flagKey: flagKey, 
-                value: resolveBooleanResponse.Value,
-                reason: resolveBooleanResponse.Reason, 
-                variant: resolveBooleanResponse.Variant
-            );
+                return new ResolutionDetails<string>(
+                    flagKey: flagKey, 
+                    value: resolveBooleanResponse.Value,
+                    reason: resolveBooleanResponse.Reason, 
+                    variant: resolveBooleanResponse.Variant
+                );
+            }
+            catch (Grpc.Core.RpcException e)
+            {
+                return GetDefaultWithException<string>(e, flagKey, defaultValue);
+            }
+            
         }
 
         /// <summary>
@@ -102,18 +129,25 @@ namespace OpenFeature.Contrib.Providers.Flagd
         /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<int>> ResolveIntegerValue(string flagKey, int defaultValue, EvaluationContext context = null)
         {
-            var resolveIntResponse = await _client.ResolveIntAsync(new ResolveIntRequest
+            try 
             {
-                Context = ConvertToContext(context),
-                FlagKey = flagKey
-            });
+                var resolveIntResponse = await _client.ResolveIntAsync(new ResolveIntRequest
+                {
+                    Context = ConvertToContext(context),
+                    FlagKey = flagKey
+                });
 
-            return new ResolutionDetails<int>(
-                flagKey: flagKey, 
-                value: (int)resolveIntResponse.Value,
-                reason: resolveIntResponse.Reason, 
-                variant: resolveIntResponse.Variant
-            );
+                return new ResolutionDetails<int>(
+                    flagKey: flagKey, 
+                    value: (int)resolveIntResponse.Value,
+                    reason: resolveIntResponse.Reason, 
+                    variant: resolveIntResponse.Variant
+                );
+            }
+            catch (Grpc.Core.RpcException e)
+            {
+                return GetDefaultWithException<int>(e, flagKey, defaultValue);
+            }
         }
 
         /// <summary>
@@ -125,18 +159,25 @@ namespace OpenFeature.Contrib.Providers.Flagd
         /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<double>> ResolveDoubleValue(string flagKey, double defaultValue, EvaluationContext context = null)
         {
-            var resolveDoubleResponse = await _client.ResolveFloatAsync(new ResolveFloatRequest
+            try 
             {
-                Context = ConvertToContext(context),
-                FlagKey = flagKey
-            });
+                var resolveDoubleResponse = await _client.ResolveFloatAsync(new ResolveFloatRequest
+                {
+                    Context = ConvertToContext(context),
+                    FlagKey = flagKey
+                });
 
-            return new ResolutionDetails<double>(
-                flagKey: flagKey, 
-                value: resolveDoubleResponse.Value,
-                reason: resolveDoubleResponse.Reason, 
-                variant: resolveDoubleResponse.Variant
-            );
+                return new ResolutionDetails<double>(
+                    flagKey: flagKey, 
+                    value: resolveDoubleResponse.Value,
+                    reason: resolveDoubleResponse.Reason, 
+                    variant: resolveDoubleResponse.Variant
+                );
+            }
+            catch (Grpc.Core.RpcException e)
+            {
+                return GetDefaultWithException<double>(e, flagKey, defaultValue);
+            }
         }
 
         /// <summary>
@@ -148,17 +189,64 @@ namespace OpenFeature.Contrib.Providers.Flagd
         /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         public override async Task<ResolutionDetails<Value>> ResolveStructureValue(string flagKey, Value defaultValue, EvaluationContext context = null)
         {
-            var resolveObjectResponse = await _client.ResolveObjectAsync(new ResolveObjectRequest
+            try
             {
-                Context = ConvertToContext(context),
-                FlagKey = flagKey
-            });
+                var resolveObjectResponse = await _client.ResolveObjectAsync(new ResolveObjectRequest
+                {
+                    Context = ConvertToContext(context),
+                    FlagKey = flagKey
+                });
 
-            return new ResolutionDetails<Value>(
+                return new ResolutionDetails<Value>(
+                    flagKey: flagKey, 
+                    value: ConvertObjectToValue(resolveObjectResponse.Value),
+                    reason: resolveObjectResponse.Reason, 
+                    variant: resolveObjectResponse.Variant
+                );
+            }
+            catch (Grpc.Core.RpcException e)
+            {
+                return GetDefaultWithException<Value>(e, flagKey, defaultValue);
+            }
+        }
+
+        private ResolutionDetails<T> GetDefaultWithException<T>(Grpc.Core.RpcException e, String flagKey, T defaultValue)
+        {
+            if (e.Status.StatusCode == Grpc.Core.StatusCode.NotFound) 
+            {
+                return new ResolutionDetails<T>(
+                    flagKey: flagKey, 
+                    value: defaultValue,
+                    reason: Constant.Reason.Error,
+                    errorType: Constant.ErrorType.FlagNotFound,
+                    errorMessage: e.Status.Detail.ToString()
+                );  
+            }
+            else if (e.Status.StatusCode == Grpc.Core.StatusCode.Unavailable) 
+            {
+                 return new ResolutionDetails<T>(
+                    flagKey: flagKey, 
+                    value: defaultValue,
+                    reason: Constant.Reason.Error,
+                    errorType: Constant.ErrorType.ProviderNotReady,
+                    errorMessage: e.Status.Detail.ToString()
+                );
+            }
+            else if (e.Status.StatusCode == Grpc.Core.StatusCode.InvalidArgument) {
+                return new ResolutionDetails<T>(
+                    flagKey: flagKey, 
+                    value: defaultValue,
+                    reason: Constant.Reason.Error,
+                    errorType: Constant.ErrorType.TypeMismatch,
+                    errorMessage: e.Status.Detail.ToString()
+                );
+            }
+            return new ResolutionDetails<T>(
                 flagKey: flagKey, 
-                value: ConvertObjectToValue(resolveObjectResponse.Value),
-                reason: resolveObjectResponse.Reason, 
-                variant: resolveObjectResponse.Variant
+                value: defaultValue,
+                reason: Constant.Reason.Error,
+                errorType: Constant.ErrorType.General,
+                errorMessage: e.Status.Detail.ToString()
             );
         }
 
