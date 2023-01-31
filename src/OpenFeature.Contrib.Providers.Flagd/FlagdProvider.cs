@@ -1,11 +1,9 @@
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using OpenFeature.Model;
-using OpenFeature.Error;
 
 using OpenFeature.Flagd.Grpc;
 using Value = OpenFeature.Model.Value;
