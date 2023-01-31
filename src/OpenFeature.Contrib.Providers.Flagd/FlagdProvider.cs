@@ -217,7 +217,7 @@ namespace OpenFeature.Contrib.Providers.Flagd
         }
 
         /// <summary>
-        ///     GetDefaultWithException resolve the value for a Boolean Flag.
+        ///     GetDefaultWithException returns the default value for a flag, together with some error information about why thy flag could not be retrieved by the provider.
         /// </summary>
         /// <param name="e">The exception thrown by the Grpc client</param>
         /// <param name="flagKey">Name of the flag</param>
@@ -263,6 +263,11 @@ namespace OpenFeature.Contrib.Providers.Flagd
             );
         }
 
+        /// <summary>
+        ///     ConvertToContext converts the given EvaluationContext to a Struct.
+        /// </summary>
+        /// <param name="ctx">The evaluation context</param>
+        /// <returns>A Struct object containing the evaluation context</returns>
         private static Struct ConvertToContext(EvaluationContext ctx)
         {
             if (ctx == null)
@@ -279,6 +284,11 @@ namespace OpenFeature.Contrib.Providers.Flagd
             return values;
         }
 
+        /// <summary>   
+        ///     ConvertToProtoValue converts the given Value to a ProtoValue.
+        /// </summary>
+        /// <param name="value">The value</param>
+        /// <returns>A ProtoValue object representing the given value</returns>
         private static ProtoValue ConvertToProtoValue(Value value)
         {
             if (value.IsList)
@@ -316,10 +326,20 @@ namespace OpenFeature.Contrib.Providers.Flagd
             return ProtoValue.ForNull();
         }
 
+        /// <summary>   
+        ///     ConvertObjectToValue converts the given Struct to a Value.
+        /// </summary>
+        /// <param name="src">The struct</param>
+        /// <returns>A Value object representing the given struct</returns>
         private static Value ConvertObjectToValue(Struct src) =>
             new Value(new Structure(src.Fields
                 .ToDictionary(entry => entry.Key, entry => ConvertToValue(entry.Value))));
 
+        /// <summary>   
+        ///     ConvertToValue converts the given ProtoValue to a Value.
+        /// </summary>
+        /// <param name="src">The value, represented as ProtoValue</param>
+        /// <returns>A Value object representing the given value</returns>
         private static Value ConvertToValue(ProtoValue src)
         {
             switch (src.KindCase)
@@ -338,6 +358,11 @@ namespace OpenFeature.Contrib.Providers.Flagd
             }
         }
 
+        /// <summary>   
+        ///     ConvertToPrimitiveValue converts the given ProtoValue to a Value.
+        /// </summary>
+        /// <param name="value">The value, represented as ProtoValue</param>
+        /// <returns>A Value object representing the given value as a primitive data type</returns>
         private static Value ConvertToPrimitiveValue(ProtoValue value)
         {
             switch (value.KindCase)
