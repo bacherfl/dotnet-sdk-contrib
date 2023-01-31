@@ -216,6 +216,13 @@ namespace OpenFeature.Contrib.Providers.Flagd
             }
         }
 
+        /// <summary>
+        ///     GetDefaultWithException resolve the value for a Boolean Flag.
+        /// </summary>
+        /// <param name="e">The exception thrown by the Grpc client</param>
+        /// <param name="flagKey">Name of the flag</param>
+        /// <param name="defaultValue">Default value to return</param>
+        /// <returns>A ResolutionDetails object containing the value of your flag</returns>
         private ResolutionDetails<T> GetDefaultWithException<T>(Grpc.Core.RpcException e, String flagKey, T defaultValue)
         {
             if (e.Status.StatusCode == Grpc.Core.StatusCode.NotFound) 
