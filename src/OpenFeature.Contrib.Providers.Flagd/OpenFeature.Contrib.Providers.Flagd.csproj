@@ -24,6 +24,7 @@
   <ItemGroup>
     <!-- The schema.proto file referenced here will be used to automatically generate the Grpc client when executing 'dotnet build' -->
     <!-- The generated files will be placed in ./obj/Debug/netstandard2.0/Protos -->
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <Protobuf Include="schemas\protobuf\schema\v1\schema.proto" GrpcServices="Client" />
     <PackageReference Include="Google.Protobuf" Version="3.21.12" />
     <PackageReference Include="Grpc.Net.Client" Version="2.51.0" />
@@ -31,5 +32,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="obj" />
   </ItemGroup>
 </Project>
